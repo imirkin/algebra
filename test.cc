@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
   typedef PolynomialOps<IntegerModNOps<4>, MonomialOps<char> > SemigroupRing1;
   SemigroupRing1 ring1;
   typename SemigroupRing1::element poly;
-  poly << make_pair(5, {'a', 'a'});
-  poly << make_pair(3, {'a', 'b'});
-  poly << make_pair(2, {'b'});
+  poly << make_pair(5, Monomial<char>({'a', 'a'}));
+  poly << make_pair(3, Monomial<char>({'a', 'b'}));
+  poly << make_pair(2, Monomial<char>({'b'}));
 
   auto t = SemigroupRing1::ring(poly, ring1);
   std::cout << "(" << t << ") * (" << t << ") = " << t * t << std::endl;
@@ -111,9 +111,16 @@ int main(int argc, char** argv) {
   typedef PolynomialOps<IntegerModNOps<4>, MonomialOps<Trace<char> > > SemigroupRing2;
   SemigroupRing2 ring2;
   typename SemigroupRing2::element poly2;
-  poly2 << make_pair(5, { Trace<char>({'b', 'a', 'b', 'c'}), Trace<char>({'b', 'c'}) });
-  poly2 << make_pair(2, { Trace<char>({'a', 'b', 'c', 'b'}), Trace<char>({'c', 'b'}) });
-  poly2 << make_pair(2, { Trace<char>({'a', 'b', 'c', 'b'}), Trace<char>({'c', 'b'}), Trace<char>({'b', 'c'}) });
+  poly2 << make_pair(5, Monomial<Trace<char>>({
+        Trace<char>({'b', 'a', 'b', 'c'}),
+        Trace<char>({'b', 'c'}) }));
+  poly2 << make_pair(2, Monomial<Trace<char>>({
+        Trace<char>({'a', 'b', 'c', 'b'}),
+        Trace<char>({'c', 'b'}) }));
+  poly2 << make_pair(2, Monomial<Trace<char>>({
+        Trace<char>({'a', 'b', 'c', 'b'}),
+        Trace<char>({'c', 'b'}),
+        Trace<char>({'b', 'c'}) }));
   std::cout << poly2 << std::endl;
 
   typedef BasicOps<Rational<>>::ring Rationals;
