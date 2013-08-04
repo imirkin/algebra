@@ -22,46 +22,39 @@
  * THE SOFTWARE.
  */
 
-// Code largely taken from Josh Grochow's implementation
+#pragma once
 
-#include <iostream>
-#include <utility>
-#include <vector>
+template <typename T=int>
+class BasicOps {
+ public:
+  static BasicOps<T> instance;
 
-#include "elements.h"
-#include "modn.h"
+  typedef T element;
+  typedef RingElt<BasicOps<T> > ring;
 
-using namespace std;
-
-int main(int argc, char** argv) {
-  typedef IntegerModOps<> Mod;
-  typedef typename Mod::ring ring;
-  vector<typename Mod::ring> inputs {
-    ring(2, Mod(3)),
-    ring(3, Mod(4)),
-    ring(1, Mod(5))
-  };
-
-  // Collect the "B"s from the extended Euclidean algorithm
-  int finalMod = 1;
-  vector<int> b;
-  for (size_t i = 0; i < inputs.size(); i++) {
-    finalMod *= inputs[i].ops_.N;
-    int curMod = inputs[i].ops_.N;
-    int tmpMod = 1;
-    for (size_t j = 0; j < inputs.size(); j++) {
-      if (i == j) continue;
-      tmpMod *= inputs[j].ops_.N;
-    }
-    int t[3] = {0};
-    extendedGcd(curMod, tmpMod, t);
-    b.push_back(t[2] * tmpMod);
+  void init(T& a) const {
   }
 
-  auto final = ring(0, Mod(finalMod));
-  for (size_t i = 0; i < b.size(); i++) {
-    final = final + b[i] * inputs[i];
+  T zero() const {
+    return 0;
   }
 
-  std::cout << final << std::endl;
-}
+  T id() const {
+    return 1;
+  }
+
+  T negate(const T& a) const {
+    return -a;
+  }
+
+  T plus(const T& a, const T& b) const {
+    return a + b;
+  }
+
+  T times(const T& a, const T& b) const {
+    return a * b;
+  }
+};
+template <typename T>
+BasicOps<T> BasicOps<T>::instance;
+

@@ -26,8 +26,14 @@
 #include <utility>
 
 #include "elements.h"
-#include "types.h"
-#include "spaces.h"
+#include "basic.h"
+#include "matrix.h"
+#include "modn.h"
+#include "monomial.h"
+#include "polynomial.h"
+#include "rational.h"
+#include "trace.h"
+#include "word.h"
 
 using namespace std;
 
@@ -69,7 +75,7 @@ int main(int argc, char** argv) {
 
   std::cout << mat_id << std::endl;
 
-  typedef DenseMatrixNSpace<5, IntegerOps<> > GL5Space;
+  typedef DenseMatrixNSpace<5, BasicOps<> > GL5Space;
   typedef GL5Space::group GL5;
 
   GL5 mat = GL5Space::instance.id();
@@ -110,7 +116,7 @@ int main(int argc, char** argv) {
   poly2 << make_pair(2, { Trace<char>({'a', 'b', 'c', 'b'}), Trace<char>({'c', 'b'}), Trace<char>({'b', 'c'}) });
   std::cout << poly2 << std::endl;
 
-  typedef IntegerOps<Rational<>>::ring Rationals;
+  typedef BasicOps<Rational<>>::ring Rationals;
   Rationals rat = Rational<>(1, 3);
   rat = rat + Rational<>(1, 6);
   std::cout << rat << std::endl;

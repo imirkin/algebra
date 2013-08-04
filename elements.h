@@ -171,3 +171,34 @@ class RingElt : public MonoidElt<Ops> {
     return RingElt(this->ops_.times(this->element_, other), this->ops_);
   }
 };
+
+
+namespace std {
+  template <typename T>
+  struct hash<SemigroupElt<T> > {
+    size_t operator()(const SemigroupElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
+
+  template <typename T>
+  struct hash<MonoidElt<T> > {
+    size_t operator()(const MonoidElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
+
+  template <typename T>
+  struct hash<GroupElt<T> > {
+    size_t operator()(const GroupElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
+
+  template <typename T>
+  struct hash<RingElt<T> > {
+    size_t operator()(const RingElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
+}
