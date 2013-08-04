@@ -39,8 +39,8 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-  typedef RingElt<IntegerModNOps<5> > Mod5Ring;
-  typedef RingElt<IntegerModOps<> > ModRing;
+  typedef IntegerModNOps<5>::ring Mod5Ring;
+  typedef IntegerModOps<>::ring ModRing;
 
   IntegerModOps<> mod2 = IntegerModOps<>(2);
 
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   std::cout << -(id - 3) << std::endl;
 
 
-  typedef GroupElt<IntegerModNOps<11> > Mod5Group;
+  typedef IntegerModNOps<11>::group Mod5Group;
   Mod5Group elt = 1;
   for (int i = 0; i < 10; i++, elt = i + 1) {
     std::cout << elt << " * " << 1 / elt << " = 1 (mod11)" << std::endl;
