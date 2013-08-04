@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <initializer_list>
 #include <vector>
 #include <algorithm>
@@ -184,19 +184,17 @@ class Word {
   std::vector<T> elements_;
 };
 namespace std {
-  namespace tr1 {
-    template <typename T>
-    struct hash<Word<T> > {
-      size_t operator()(const Word<T>& word) const {
-        size_t ret = 0;
-        for (auto it = word.elements_.begin(); it != word.elements_.end(); ++it) {
-          ret *= 31;
-          ret += hash<T>()(*it);
-        }
-        return ret;
+  template <typename T>
+  struct hash<Word<T> > {
+    size_t operator()(const Word<T>& word) const {
+      size_t ret = 0;
+      for (auto it = word.elements_.begin(); it != word.elements_.end(); ++it) {
+        ret *= 31;
+        ret += hash<T>()(*it);
       }
-    };
-  }
+      return ret;
+    }
+  };
 }
 
 template <typename T>
@@ -247,21 +245,19 @@ class Trace {
   Word<T> word_;
 };
 namespace std {
-  namespace tr1 {
-    template <typename T>
-    struct hash<Trace<T> > {
-      size_t operator()(const Trace<T>& trace) const {
-        std::vector<T> elements = trace.word_.elements_;
-        std::sort(elements.begin(), elements.end());
-        size_t ret = 0;
-        for (size_t i = 0; i < elements.size(); i++) {
-          ret += hash<T>()(elements[i]);
-          ret *= 31;
-        }
-        return ret;
+  template <typename T>
+  struct hash<Trace<T> > {
+    size_t operator()(const Trace<T>& trace) const {
+      std::vector<T> elements = trace.word_.elements_;
+      std::sort(elements.begin(), elements.end());
+      size_t ret = 0;
+      for (size_t i = 0; i < elements.size(); i++) {
+        ret += hash<T>()(elements[i]);
+        ret *= 31;
       }
-    };
-  }
+      return ret;
+    }
+  };
 }
 
 template <typename T>
@@ -321,25 +317,23 @@ class Monomial {
     return *this;
   }
 
-  std::tr1::unordered_map<T, int> exponents_;
+  std::unordered_map<T, int> exponents_;
 };
 namespace std {
-  namespace tr1 {
-    template <typename T>
-    struct hash<Monomial<T> > {
-      size_t operator()(const Monomial<T>& monomial) const {
-        // TODO: For this to be consistent, need to sort the elements first...
-        size_t ret = 0;
-        for (auto it = monomial.exponents_.begin(); it != monomial.exponents_.end(); ++it) {
-          ret *= 31;
-          ret += hash<T>()(it->first);
-          ret *= 31;
-          ret += hash<int>()(it->second);
-        }
-        return ret;
+  template <typename T>
+  struct hash<Monomial<T> > {
+    size_t operator()(const Monomial<T>& monomial) const {
+      // TODO: For this to be consistent, need to sort the elements first...
+      size_t ret = 0;
+      for (auto it = monomial.exponents_.begin(); it != monomial.exponents_.end(); ++it) {
+        ret *= 31;
+        ret += hash<T>()(it->first);
+        ret *= 31;
+        ret += hash<int>()(it->second);
       }
-    };
-  }
+      return ret;
+    }
+  };
 }
 
 template <typename T>
@@ -379,7 +373,7 @@ class Polynomial {
     return *this;
   }
 
-  std::tr1::unordered_map<typename S::monoid, typename R::ring> components_;
+  std::unordered_map<typename S::monoid, typename R::ring> components_;
 };
 
 template <typename R, typename S>
@@ -477,7 +471,7 @@ class SparseMatrix {
   int width_;
   int height_;
   E default_;
-  std::tr1::unordered_map<int, E> elements_;
+  std::unordered_map<int, E> elements_;
 };
 
 
@@ -487,33 +481,31 @@ class SparseMatrix {
 // functions. Also, for reasons not-understood, it didn't seem to want
 // to infer types correctly.
 namespace std {
-  namespace tr1 {
-    template <typename T>
-    struct hash<SemigroupElt<T> > {
-      size_t operator()(const SemigroupElt<T>& e) const {
-        return hash<typename T::element>()(e.element_);
-      }
-    };
+  template <typename T>
+  struct hash<SemigroupElt<T> > {
+    size_t operator()(const SemigroupElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
 
-    template <typename T>
-    struct hash<MonoidElt<T> > {
-      size_t operator()(const MonoidElt<T>& e) const {
-        return hash<typename T::element>()(e.element_);
-      }
-    };
+  template <typename T>
+  struct hash<MonoidElt<T> > {
+    size_t operator()(const MonoidElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
 
-    template <typename T>
-    struct hash<GroupElt<T> > {
-      size_t operator()(const GroupElt<T>& e) const {
-        return hash<typename T::element>()(e.element_);
-      }
-    };
+  template <typename T>
+  struct hash<GroupElt<T> > {
+    size_t operator()(const GroupElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
 
-    template <typename T>
-    struct hash<RingElt<T> > {
-      size_t operator()(const RingElt<T>& e) const {
-        return hash<typename T::element>()(e.element_);
-      }
-    };
-  }
+  template <typename T>
+  struct hash<RingElt<T> > {
+    size_t operator()(const RingElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
 }

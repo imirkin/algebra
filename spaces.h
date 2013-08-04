@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <vector>
 
 // TODO: Rewrite all the ops to mutate a so that we can write more
@@ -270,7 +270,7 @@ class PolynomialOps {
 
   element plus(const element& a, const element& b) const {
     // Need to group identical semigroup elements and add up their coefficients.
-    std::tr1::unordered_map<typename S::monoid, typename R::ring> terms =
+    std::unordered_map<typename S::monoid, typename R::ring> terms =
       a.components_;
     for (auto it = b.components_.begin(); it != b.components_.end(); ++it) {
       auto existing_it = terms.find(it->first);

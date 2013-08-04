@@ -23,7 +23,7 @@
  */
 
 #include <ostream>
-#include <tr1/functional>
+#include <functional>
 
 // NOTE: For ops that don't have default constructors, the expectation
 // is that they will survive for the duration of the element's
