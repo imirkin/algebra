@@ -110,5 +110,10 @@ int main(int argc, char** argv) {
   poly2 << make_pair(2, { Trace<char>({'a', 'b', 'c', 'b'}), Trace<char>({'c', 'b'}), Trace<char>({'b', 'c'}) });
   std::cout << poly2 << std::endl;
 
+  typedef IntegerOps<Rational<>>::ring Rationals;
+  Rationals rat = Rational<>(1, 3);
+  rat = rat + Rational<>(1, 6);
+  std::cout << rat << std::endl;
+
   return 0;
 }

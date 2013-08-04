@@ -121,12 +121,43 @@ class Rational {
     normalize_();
   }
   Rational(const Rational<T>& other) :
-      numerator_(other.numerator_), denominator_(other.denominator_) {
-    normalize_();
-  }
+      numerator_(other.numerator_), denominator_(other.denominator_) {}
   void operator=(const Rational<T>& other) {
     numerator_ = other.numerator_;
     denominator_ = other.denominator_;
+  }
+  void operator=(const T& num) {
+    numerator_ = num;
+    denominator_ = 1;
+  }
+
+  bool operator==(const Rational<T>& other) const {
+    return numerator_ == other.numerator_ && denominator_ == other.denominator_;
+  }
+
+  Rational<T>& operator+=(const Rational<T>& other) {
+    numerator_ = numerator_ * other.denominator_ +
+      other.numerator_ * denominator_;
+    denominator_ *= other.denominator_;
+    normalize_();
+    return *this;
+  }
+  Rational<T> operator+(const Rational<T>& other) const {
+    return Rational(*this) += other;
+  }
+
+  Rational<T>& operator*=(const Rational<T>& other) {
+    numerator_ *= other.numerator_;
+    denominator_ *= other.denominator_;
+    normalize_();
+    return *this;
+  }
+  Rational<T> operator*(const Rational<T>& other) const {
+    return Rational(*this) *= other;
+  }
+
+  Rational<T> operator-() {
+    return Rational(-numerator_, denominator_);
   }
 
   void normalize_() {
@@ -147,7 +178,9 @@ class Rational {
 
 template <typename T>
 std::ostream& operator<<(std::ostream& stream, const Rational<T>& rational) {
-  stream << rational.numerator_ << "/" << rational.denominator_;
+  stream << rational.numerator_;
+  if (rational.denominator_ != 1)
+    stream << "/" << rational.denominator_;
   return stream;
 }
 
