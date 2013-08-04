@@ -1,0 +1,77 @@
+This is a C++ library that helps to write code that reasonably
+expresses various concepts from abstract algebra. Using this you can
+write algorithms that act on generic group elements, and then plug in
+specifics, and get optimized code for your specific usage.
+
+Overall structure:
+
+All of the mapping definitions are contained inside of Ops
+structures. These ops define all the operations necessary for the
+semigroup/monoid/group/ring elements. To review:
+
+Semigroup: composition (*)
+Monoid: composition (*), and identity
+Group: composition (*), inverse (/), and identity (id)
+Ring: multiply (*), add (+), negate(-), multiplicative identity (id),
+      additive identity (zero)
+
+The operation structure will also have a ::element typedef which
+defines the object type that will be contained, but that will most
+often just be passed in as a template parameter. A good, simple
+example to look at is BasicOps in basic.h. For something a bit more
+complicated, see modn.h which implements integers mod N in both a
+known-at-compilation and dynamic methods.
+
+Most operation structures do not have a variable way of working, and
+will have a Ops::instance object. However, some will require a
+parameter to construct, like the dynamic integer mod N ops structure.
+
+The operation structure will also generally be used with
+groups/rings/etc, and will have typedefs in place for the
+GroupElt/RingElt/etc that make use of the operation, via ::group,
+::ring, etc.
+
+A GroupElt contains both a representation of the group element it is
+storing, as well as a reference to the operation structure so that it
+knows how to compose that group element with other elements. (Same
+goes for the other *Elt classes.) Operators are overridden to make
+usage seamless. Also due to implicit casting, you can do something
+like:
+
+  typedef IntegerModNOps<5>::ring Mod5Ring;
+  auto v = Mod5Ring(4) + 7;
+
+and have v become the element 1.
+
+Implemented types:
+
+Rational -- stores an int numerator/denominator, supports + and *
+Word<T> -- stores an ordered list of elements of type T
+Trace<T> -- stores a Word<T> and specifies cyclic equality
+Monomial<T> -- stores a map of T -> exponent
+Polynomial<R, S> -- stores a map of S monoids -> R rings. Addition and
+                    multiplication work as expected for polynomials
+                    with coefficients in R and monomials in S. (R and
+                    S are operations structures.)
+DenseMatrix<Ops> -- stores a full matrix of elements from Ops::ring.
+
+Implemented operation structures:
+
+BasicOps<T> -- just uses the regular +, * semantics on the given type,
+               and uses the literal 1 for identity and 0 for zero. A
+               type has to be constructable from those literals to be
+               used.
+IntegerModNOps<N, T> -- integer operations mod N, which is given at
+                        compile time.
+IntegerModOps<T> -- integer operations mod N, which is given in the
+                    constructor. Note that this ops structure needs to
+                    be carefully passed to group elements, since there
+                    is no default ::instance
+MonomialOps<T> -- Monomial<T> as the element. semigroup and monoid typedefs
+PolynomialOps<R, S> -- Polynomial<T> as the element. ring typedef.
+DenseMatrixOps<Ops> -- DenseMatrix<Ops> as the element
+DenseMatrixNSpace<N, Ops> -- defines a GL(N) space of matrices that
+                             contain DenseMatrix elements in Ops::ring
+
+See test.cc for demonstrations of a bunch of these, along with the
+intended usage of all of these types.
