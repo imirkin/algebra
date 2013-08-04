@@ -115,6 +115,7 @@ static void extendedGcd(T x, T y, T* ret) {
 template <typename T=int>
 class Rational {
  public:
+  Rational(T num) : numerator_(num), denominator_(1) {}
   Rational(T num, T denom) : numerator_(num), denominator_(denom) {
     if (denom == 0) throw "div by zero";
     normalize_();
