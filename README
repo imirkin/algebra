@@ -14,6 +14,8 @@ Monoid: composition (*), and identity
 Group: composition (*), inverse (/), and identity (id)
 Ring: multiply (*), add (+), negate(-), multiplicative identity (id),
       additive identity (zero)
+Field: multiply (*), inverse (/), add (+), negate (-), multiplicative
+       identity (id), additive identity (zero)
 
 The operation structure will also have a ::element typedef which
 defines the object type that will be contained, but that will most

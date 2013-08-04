@@ -52,6 +52,9 @@ class SemigroupElt {
   SemigroupElt operator*(const T& other) const {
     return SemigroupElt(ops_.times(element_, other), ops_);
   }
+  SemigroupElt operator^(int n) const {
+    return SemigroupElt(this->pow(n, element_), this->ops_);
+  }
 
   bool operator==(const SemigroupElt<Ops>& other) const {
     return element_ == other.element_;
@@ -71,6 +74,21 @@ class SemigroupElt {
   T element_;
 
   const Ops& ops_;
+
+ protected:
+  T pow(int n, T base) const {
+    T result = this->ops_.id();
+    while (n > 0) {
+      if (n % 2 == 1) {
+        result = this->ops_.times(result, base);
+        n--;
+      }
+      base = this->ops_.times(base, base);
+      n /= 2;
+    }
+    return result;
+  }
+
 };
 
 template <typename Ops>
@@ -93,6 +111,9 @@ class MonoidElt : public SemigroupElt<Ops> {
 
   MonoidElt operator*(const T& other) const {
     return MonoidElt(this->ops_.times(this->element_, other), this->ops_);
+  }
+  MonoidElt operator^(int n) const {
+    return MonoidElt(this->pow(n, this->element_), this->ops_);
   }
 };
 
@@ -119,21 +140,10 @@ class GroupElt : public MonoidElt<Ops> {
   }
 
   GroupElt operator^(int n) const {
-    T result = this->ops_.id();
-    T base = this->element_;
-    if (n < 0) {
-      base = this->ops_.inv(this->element_);
-      n = -n;
-    }
-    while (n > 0) {
-      if (n % 2 == 1) {
-        result = this->ops_.times(result, base);
-        n--;
-      }
-      base = this->ops_.times(base, base);
-      n /= 2;
-    }
-    return GroupElt(result, this->ops_);
+    if (n >= 0)
+      return GroupElt(this->pow(n, this->element_), this->ops_);
+    else
+      return GroupElt(this->pow(-n, this->ops_.inv(this->element_)), this->ops_);
   }
 };
 
@@ -170,6 +180,50 @@ class RingElt : public MonoidElt<Ops> {
   RingElt operator*(const T& other) const {
     return RingElt(this->ops_.times(this->element_, other), this->ops_);
   }
+  RingElt operator^(int n) const {
+    return RingElt(this->pow(n, this->element_), this->ops_);
+  }
+};
+
+
+template <typename Ops>
+class FieldElt : public MonoidElt<Ops> {
+  typedef typename Ops::element T;
+ public:
+  FieldElt(const T& element) : MonoidElt<Ops>(element) {}
+  FieldElt(const T& element, const Ops& ops) : MonoidElt<Ops>(element, ops) {}
+  FieldElt(const FieldElt<Ops>& other) : MonoidElt<Ops>(other) {}
+
+  FieldElt id() const {
+    return FieldElt(this->ops_.id(), this->ops_);
+  }
+  FieldElt zero() const {
+    return FieldElt(this->ops_.zero(), this->ops_);
+  }
+
+  FieldElt operator-() const {
+    return FieldElt(this->ops_.negate(this->element_), this->ops_);
+  }
+  FieldElt operator-(const T& other) const {
+    return FieldElt(this->ops_.plus(this->element_, this->ops_.negate(other)), this->ops_);
+  }
+  FieldElt operator+(const T& other) const {
+    return FieldElt(this->ops_.plus(this->element_, other), this->ops_);
+  }
+  FieldElt operator*(const T& other) const {
+    return FieldElt(this->ops_.times(this->element_, other), this->ops_);
+  }
+  FieldElt operator/(const T& other) const {
+    return FieldElt(
+        this->ops_.times(this->element_, this->ops_.inv(other)),
+        this->ops_);
+  }
+  FieldElt operator^(int n) const {
+    if (n >= 0)
+      return FieldElt(this->pow(n, this->element_), this->ops_);
+    else
+      return FieldElt(this->pow(-n, this->ops_.inv(this->element_)), this->ops_);
+  }
 };
 
 
@@ -198,6 +252,13 @@ namespace std {
   template <typename T>
   struct hash<RingElt<T> > {
     size_t operator()(const RingElt<T>& e) const {
+      return hash<typename T::element>()(e.element_);
+    }
+  };
+
+  template <typename T>
+  struct hash<FieldElt<T> > {
+    size_t operator()(const FieldElt<T>& e) const {
       return hash<typename T::element>()(e.element_);
     }
   };
