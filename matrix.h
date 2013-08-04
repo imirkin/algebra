@@ -89,6 +89,13 @@ class DenseMatrix {
     return DenseMatrix(*this) += other;
   }
 
+  DenseMatrix& operator*=(const element& other) {
+    for (int i = 0; i < height_; i++)
+      for (int j = 0; j < width_; j++)
+        (*this)[i][j] = (*this)[i][j] * other;
+    return *this;
+  }
+
   int width_;
   int height_;
   std::vector<element> elements_;
