@@ -59,6 +59,16 @@ class Monomial {
     return !(*this == other);
   }
 
+  Monomial& operator*=(const Monomial<T>& other) {
+    for (auto it = other.exponents_.begin(); it != other.exponents_.end(); ++it) {
+      *this << *it;
+    }
+    return *this;
+  }
+  Monomial operator*(const Monomial<T>& other) const {
+    return Monomial(*this) *= other;
+  }
+
   Monomial& operator<<(const T& term) {
     auto it = exponents_.find(term);
     if (it != exponents_.end()) {
@@ -128,11 +138,7 @@ class MonomialOps {
   }
 
   element times(const element& a, const element& b) const {
-    element ret = a;
-    for (auto it = b.exponents_.begin(); it != b.exponents_.end(); ++it) {
-      ret << *it;
-    }
-    return ret;
+    return a * b;
   }
 };
 template <typename T>

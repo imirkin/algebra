@@ -54,6 +54,58 @@ class Polynomial {
     return *this;
   }
 
+  Polynomial& operator+=(const Polynomial<R, S>& other) {
+    for (auto it = other.components_.begin(); it != other.components_.end(); ++it) {
+      *this << make_pair(it->second, it->first);
+    }
+    return *this;
+  }
+  Polynomial operator+(const Polynomial<R, S>& other) const {
+    return Polynomial(*this) += other;
+  }
+
+  Polynomial& operator*=(const Polynomial<R, S>& other) {
+    *this = *this * other;
+    return *this;
+  }
+  Polynomial operator*(const Polynomial<R, S>& other) const {
+    // zip([a*b for a in r1 for b in r2],
+    //     ["".join(sorted(a+b)) for a in s1 for b in s2])
+    //
+    // And then group ring values based on the semigroup elements
+    std::vector<typename S::monoid> s;
+    std::vector<typename R::ring> r;
+
+    size_t total = components_.size() * other.components_.size();
+    s.reserve(total);
+    r.reserve(total);
+
+    for (auto a_it = components_.begin(); a_it != components_.end(); ++a_it) {
+      for (auto b_it = other.components_.begin(); b_it != other.components_.end(); ++b_it) {
+        s.push_back(a_it->first * b_it->first);
+        r.push_back(a_it->second * b_it->second);
+      }
+    }
+    Polynomial<R, S> ret;
+    for (size_t i = 0; i < s.size(); i++) {
+      auto s_i = s[i];
+      auto r_i = r[i];
+      if (r_i == r_i.zero()) {
+        continue;
+      }
+      auto it = ret.components_.find(s_i);
+      if (it == ret.components_.end()) {
+        ret.components_.insert(make_pair(s_i, r_i));
+      } else {
+        it->second = it->second + r_i;
+        if (it->second == it->second.zero()) {
+          ret.components_.erase(it);
+        }
+      }
+    }
+    return ret;
+  }
+
   std::unordered_map<typename S::monoid, typename R::ring> components_;
 };
 
@@ -93,61 +145,11 @@ class PolynomialOps {
   }
 
   element plus(const element& a, const element& b) const {
-    // Need to group identical semigroup elements and add up their coefficients.
-    std::unordered_map<typename S::monoid, typename R::ring> terms =
-      a.components_;
-    for (auto it = b.components_.begin(); it != b.components_.end(); ++it) {
-      auto existing_it = terms.find(it->first);
-      if (existing_it == terms.end()) {
-        terms.insert(*it);
-      } else {
-        existing_it->second = existing_it->second + it->second;
-        if (existing_it->second == existing_it->second.zero()) {
-          terms.erase(existing_it);
-        }
-      }
-    }
-    element ret;
-    ret.components_ = terms;
-    return ret;
+    return a + b;
   }
 
   element times(const element& a, const element& b) const {
-    // zip([a*b for a in r1 for b in r2],
-    //     ["".join(sorted(a+b)) for a in s1 for b in s2])
-    //
-    // And then group ring values based on the semigroup elements
-    std::vector<typename S::monoid> s;
-    std::vector<typename R::ring> r;
-
-    size_t total = a.components_.size() * b.components_.size();
-    s.reserve(total);
-    r.reserve(total);
-
-    for (auto a_it = a.components_.begin(); a_it != a.components_.end(); ++a_it) {
-      for (auto b_it = b.components_.begin(); b_it != b.components_.end(); ++b_it) {
-        s.push_back(a_it->first * b_it->first);
-        r.push_back(a_it->second * b_it->second);
-      }
-    }
-    element ret;
-    for (size_t i = 0; i < s.size(); i++) {
-      auto s_i = s[i];
-      auto r_i = r[i];
-      if (r_i == r_i.zero()) {
-        continue;
-      }
-      auto it = ret.components_.find(s_i);
-      if (it == ret.components_.end()) {
-        ret.components_.insert(make_pair(s_i, r_i));
-      } else {
-        it->second = it->second + r_i;
-        if (it->second == it->second.zero()) {
-          ret.components_.erase(it);
-        }
-      }
-    }
-    return ret;
+    return a * b;
   }
 
   const R& ring_ops_;

@@ -29,38 +29,74 @@
 
 #pragma once
 
-template <typename E>
+template <typename Ops>
 class DenseMatrix {
  public:
-  typedef typename std::vector<E>::iterator iterator;
+  typedef typename Ops::ring element;
 
-  DenseMatrix(int width, int height, const E& def) : width_(width), height_(height) {
+  DenseMatrix(int width, int height, const element& def) :
+      width_(width), height_(height), default_(def) {
     elements_.resize(width * height, def);
   }
-  DenseMatrix(const DenseMatrix<E>& other) :
-      width_(other.width_), height_(other.height_), elements_(other.elements_) {}
-  void operator=(const DenseMatrix<E>& other) {
+  DenseMatrix(const DenseMatrix<Ops>& other) :
+      width_(other.width_), height_(other.height_),
+      elements_(other.elements_), default_(other.default_) {}
+  void operator=(const DenseMatrix<Ops>& other) {
     width_ = other.width_;
     height_ = other.height_;
     elements_ = other.elements_;
+    default_ = other.default_;
   }
 
   // Someone can do matrix[a][b] and have it work as an L-value
-  typename std::vector<E>::iterator operator[](int index) {
+  typename std::vector<element>::iterator operator[](int index) {
     return elements_.begin() + index * width_;
   }
 
-  typename std::vector<E>::const_iterator operator[](int index) const {
+  typename std::vector<element>::const_iterator operator[](int index) const {
     return elements_.begin() + index * width_;
+  }
+
+  DenseMatrix& operator*=(const DenseMatrix<Ops>& other) {
+    *this = *this * other;
+    return *this;
+  }
+  DenseMatrix operator*(const DenseMatrix<Ops>& other) const {
+    if (width_ != other.height_) throw "Size mismatch";
+    DenseMatrix<Ops> ret(other.width_, height_, default_.zero());
+    for (int i = 0; i < other.width_; i++) {
+      for (int j = 0; j < height_; j++) {
+        element elt = default_.zero();
+        for (int n = 0; n < width_; n++) {
+          elt = elt + (*this)[j][n] * other[n][i];
+        }
+        ret[j][i] = elt;
+      }
+    }
+    return ret;
+  }
+
+  DenseMatrix& operator+=(const DenseMatrix<Ops>& other) {
+    if (width_ != other.width_ || height_ != other.height_) throw "Size mismatch";
+    for (int i = 0; i < height_; i++) {
+      for (int j = 0; j < width_; j++) {
+        (*this)[i][j] += other[i][j];
+      }
+    }
+    return *this;
+  }
+  DenseMatrix operator+(const DenseMatrix<Ops>& other) {
+    return DenseMatrix(*this) += other;
   }
 
   int width_;
   int height_;
-  std::vector<E> elements_;
+  std::vector<element> elements_;
+  element default_;
 };
 
-template <typename E>
-std::ostream& operator<<(std::ostream& stream, const DenseMatrix<E>& matrix) {
+template <typename Ops>
+std::ostream& operator<<(std::ostream& stream, const DenseMatrix<Ops>& matrix) {
   for (int i = 0; i < matrix.height_; i++) {
     for (int j = 0; j < matrix.width_; j++) {
       stream << " " << matrix[i][j];
@@ -99,6 +135,7 @@ class SparseMatrix {
   };
 
   // Someone can do matrix[a][b], but only as an R-value
+  // TODO: should be possible to make this L-value-capable
   iterator operator[](int index) const {
     return iterator(index);
   }
@@ -122,26 +159,14 @@ class DenseMatrixOps {
 
   static DenseMatrixOps<Ops> instance;
 
-  typedef RingElt<Ops> R;
-  typedef DenseMatrix<R> element;
+  typedef DenseMatrix<Ops> element;
 
   void init(element& a) const {
   }
 
-  DenseMatrix<R> times(const DenseMatrix<R>& a, const DenseMatrix<R>& b) const {
+  DenseMatrix<Ops> times(const DenseMatrix<Ops>& a, const DenseMatrix<Ops>& b) const {
     //assert(a.width_ == b.height_);
-    if (a.width_ != b.height_) throw "Size mismatch";
-    DenseMatrix<R> ret(b.width_, a.height_, elt_ops_.zero());
-    for (int i = 0; i < b.width_; i++) {
-      for (int j = 0; j < a.height_; j++) {
-        R elt = elt_ops_.zero();
-        for (int n = 0; n < a.width_; n++) {
-          elt = elt + a[j][n] * b[n][i];
-        }
-        ret[j][i] = elt;
-      }
-    }
-    return ret;
+    return a * b;
   }
 
   const Ops& elt_ops_;
@@ -155,13 +180,12 @@ class DenseMatrixNSpace : public DenseMatrixOps<Ops> {
 
   static DenseMatrixNSpace<N, Ops> instance;
 
-  typedef RingElt<Ops> R;
-  typedef DenseMatrix<R> element;
+  typedef DenseMatrix<Ops> element;
   typedef RingElt<DenseMatrixNSpace<N, Ops> > ring;
   typedef GroupElt<DenseMatrixNSpace<N, Ops> > group;
 
-  DenseMatrix<R> id() const {
-    DenseMatrix<R> ret(N, N, this->elt_ops_.zero());
+  DenseMatrix<Ops> id() const {
+    DenseMatrix<Ops> ret(N, N, this->elt_ops_.zero());
     for (int i = 0; i < N; i++) {
       ret[i][i] = this->elt_ops_.id();
     }
