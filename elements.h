@@ -88,7 +88,7 @@ class MonoidElt : public SemigroupElt<Ops> {
   MonoidElt(const MonoidElt<Ops>& other) : SemigroupElt<Ops>(other) {}
 
   MonoidElt id() const {
-    return MonoidElt(this.ops_.id(), this->ops_);
+    return MonoidElt(this->ops_.id(), this->ops_);
   }
 
   MonoidElt operator*(const T& other) const {
