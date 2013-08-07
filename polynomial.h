@@ -44,7 +44,7 @@ class Polynomial {
     }
     auto it = components_.find(term.second);
     if (it == components_.end()) {
-      components_.insert(make_pair(term.second, term.first));
+      components_.insert(std::make_pair(term.second, term.first));
     } else {
       it->second = it->second + term.first;
       if (it->second == it->second.zero()) {
@@ -56,7 +56,7 @@ class Polynomial {
 
   Polynomial& operator+=(const Polynomial<R, S>& other) {
     for (auto it = other.components_.begin(); it != other.components_.end(); ++it) {
-      *this << make_pair(it->second, it->first);
+      *this << std::make_pair(it->second, it->first);
     }
     return *this;
   }
@@ -95,7 +95,7 @@ class Polynomial {
       }
       auto it = ret.components_.find(s_i);
       if (it == ret.components_.end()) {
-        ret.components_.insert(make_pair(s_i, r_i));
+        ret.components_.insert(std::make_pair(s_i, r_i));
       } else {
         it->second = it->second + r_i;
         if (it->second == it->second.zero()) {
@@ -141,7 +141,7 @@ class PolynomialOps {
   }
 
   element id() const {
-    return element() << make_pair(ring_ops_.id(), semigroup_ops_.id());
+    return element() << std::make_pair(ring_ops_.id(), semigroup_ops_.id());
   }
 
   element plus(const element& a, const element& b) const {

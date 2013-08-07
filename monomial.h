@@ -74,7 +74,7 @@ class Monomial {
     if (it != exponents_.end()) {
       it->second++;
     } else {
-      exponents_.insert(make_pair(term, 1));
+      exponents_.insert(std::make_pair(term, 1));
     }
     return *this;
   }
