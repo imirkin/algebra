@@ -1,5 +1,5 @@
 CXXFLAGS = -O2 -Wall -g -std=c++0x
-LDFLAGS = -lstdc++
+LINK.o = $(LINK.cc)
 
 all: test chinese
 test: test.o
